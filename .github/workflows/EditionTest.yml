@@ -1,8 +1,5 @@
-
-# This is a basic workflow to help you get started with Actions
- 
 name: EditionChecking
- 
+
 # Controls when the workflow will run
 on:
   # Triggers the workflow on push or pull request events but only for the "release" branch
@@ -10,26 +7,30 @@ on:
     #branches:
       #- release
       #- 'migrations/**'
- 
+
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
- 
+
 env:
- 
   FLYWAY_LICENSE_KEY: ${{ secrets.FLYWAY_LICENSE_KEY }} #Repository Secret - Create this within the Projects Settings > Secrects > Actions section
   # If the first undo script is U002, this will validate all undo scripts up to and including that
   FIRST_UNDO_SCRIPT: "002.20230703112421"
   # Enable this for additional debug logging
-  ACTIONS_RUNNER_DEBUG: true 
- 
+  ACTIONS_RUNNER_DEBUG: true
+
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "build"
   EditionCheck:
     name: Build
-      shell: pwsh
-      run: |
-        Scripts\FindVersion.ps1
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Run PowerShell script
+        run: Scripts\FindVersion.ps1
+
         
   
   build:
