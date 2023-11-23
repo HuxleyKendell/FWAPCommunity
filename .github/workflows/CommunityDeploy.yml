@@ -1,4 +1,4 @@
-# This is a basic workflow to help you get started with Actions
+Chec# This is a basic workflow to help you get started with Actions
  
 name: Community-Workflow
  
@@ -83,7 +83,7 @@ jobs:
       - name: Install SQL Fluff
         if: ${{ true }}
         run: |
-          ${{ GITHUB.WORKSPACE }}\Scripts\pip.exe install sqlfluff==1.2.1'
+          ${{ GITHUB.WORKSPACE }}\Scripts\pip.exe install sqlfluff==1.2.1
       
       - name: Check Code
         run: |
@@ -96,7 +96,7 @@ jobs:
     name: Deploy Test
     # The type of runner that the job will run on
     runs-on: self-hosted
-    needs: build
+    needs: CodeCheck
     environment: 'Test' #Ensure this environment name is setup in the projects Settings>Environment area. Ensuring any reviewers are also configured 
     if: ${{ true }} #Set this variable to false to temporarily disable the job
     env:
