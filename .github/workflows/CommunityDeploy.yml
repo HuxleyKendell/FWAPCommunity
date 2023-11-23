@@ -53,7 +53,8 @@ jobs:
         if: env.executeBuild == 'true'
         run: |
           flyway -baselineOnMigrate="true" -licenseKey="${{ env.FLYWAY_LICENSE_KEY }}" -configFiles="${{ GITHUB.WORKSPACE }}\flyway.conf" -locations="filesystem:${{ GITHUB.WORKSPACE }}\migrations" info migrate info -url="${{ env.JDBC }}" -cleanDisabled='false' -reportFilename="Reports\ValidateVScripts"
-          
+
+
  
 
   CodeCheck:
@@ -74,12 +75,6 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v3
         
-      # Runs the Flyway Migrate against the Production database
-      - name: Migrate Build DB
-        if: ${{ true }}
-        run: |
-          flyway -user="${{ env.userName }}" -password="${{ env.password }}" -baselineOnMigrate="true" -licenseKey="${{ env.FLYWAY_LICENSE_KEY }}" -configFiles="${{ GITHUB.WORKSPACE }}\flyway.conf" -locations="filesystem:${{ GITHUB.WORKSPACE }}\migrations" info migrate info -url="${{ env.JDBC }}" -cleanDisabled='false'
-
       - name: Install SQL Fluff
         if: ${{ true }}
         run: |
@@ -87,9 +82,20 @@ jobs:
       
       - name: Check Code
         run: |
-          flyway check -code -user="${{ env.userName }}" -password="${{ env.password }}" -baselineOnMigrate="true" -licenseKey="${{ env.FLYWAY_LICENSE_KEY }}" -configFiles="${{ GITHUB.WORKSPACE }}\flyway.conf" -locations="filesystem:${{ GITHUB.WORKSPACE }}\migrations" -url="${{ env.JDBC }}" -cleanDisabled='false'
+          flyway check -code -user="${{ env.userName }}" -password="${{ env.password }}" -baselineOnMigrate="true" -licenseKey="${{ env.FLYWAY_LICENSE_KEY }}" -configFiles="${{ GITHUB.WORKSPACE }}\flyway.conf" -locations="filesystem:${{ GITHUB.WORKSPACE }}\migrations" -url="${{ env.JDBC }}" -cleanDisabled='false' "-reportFilename=${{ GITHUB.WORKSPACE }}\reports\${{ env.databaseName }}-Run-${{ GITHUB.RUN_ID }}-Check-Report.html"
 
-          
+
+     # Create a directory to stage the artifact files
+      - name: Stage files for publishing
+        if: env.publishArtifacts == 'true'
+        run: |
+          cp -R ${{ GITHUB.WORKSPACE }}\reports Artifact_Files/Reports/
+
+      - name: Publish Check Report as Artifact
+        uses: actions/upload-artifact@v2
+        with: 
+          name: flyway-reports
+          path: Artifact_Files/Reports/
 
 
   Test:
@@ -116,6 +122,17 @@ jobs:
         run: |
           flyway -user="${{ env.userName }}" -password="${{ env.password }}" -baselineOnMigrate="true" -licenseKey="${{ env.FLYWAY_LICENSE_KEY }}" -configFiles="${{ GITHUB.WORKSPACE }}\flyway.conf" -locations="filesystem:${{ GITHUB.WORKSPACE }}\migrations" info migrate info -url="${{ env.JDBC }}" -cleanDisabled='false'
 
+        # Create a directory to stage the artifact files
+      - name: Stage files for publishing
+        if: env.publishArtifacts == 'true'
+        run: |
+          cp -R ${{ GITHUB.WORKSPACE }}\reports Artifact_Files/Reports/
+
+      - name: Publish Check Report as Artifact
+        uses: actions/upload-artifact@v2
+        with: 
+          name: flyway-reports
+          path: Artifact_Files/Reports/
 
   prod:
     name: Deploy Production
